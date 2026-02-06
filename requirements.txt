@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+aiohttp
+python-dotenv
+ddos_killer @ git+https://github.com/ddos-killer/ddos_killer.git
