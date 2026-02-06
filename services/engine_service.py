@@ -15,7 +15,10 @@ class EngineService:
 
         async def runner():
             async with self.detector:
-                await self.detector.run()
+                initialized = await self.detector.run()
+                if not initialized:
+                    return False
+
 
         self.task = asyncio.create_task(runner())
         logger.info("Engine started")
