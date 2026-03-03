@@ -30,6 +30,12 @@ class EngineService:
             logger.info("Engine stopped")
             return True
         return False
+    
+    async def set_threshold(self, attack_type: str, threshold: int):
+        if self.task and not self.task.done():
+            logger.error("You must stop the engine first!")
+            return False
+        return await self.detector.set_threshold(attack_type, threshold)
 
     def status(self):
         return {

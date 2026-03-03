@@ -15,3 +15,7 @@ async def stop():
 @router.get("/status")
 def status():
     return engine.status()
+
+@router.post("/threshold")
+async def threshold(attack_type: str, threshold: int):
+    return {"changed": await engine.set_threshold(attack_type, threshold) }
