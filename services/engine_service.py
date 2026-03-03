@@ -8,10 +8,27 @@ class EngineService:
         self.config = Config()
         self.detector = DDosDetector(self.config)
         self.task: asyncio.Task | None = None
+        self._context_entered = False
+
+    async def __aenter__(self):
+        """Entre dans le context manager du service"""
+        await self.detector.__aenter__()
+        self._context_entered = True
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Sort du context manager du service"""
+        if self._context_entered:
+            await self.detector.__aexit__(exc_type, exc_val, exc_tb)
+            self._context_entered = False
 
     async def start(self):
         if self.task and not self.task.done():
             return False
+        
+        if not self._context_entered:
+            await self.detector.__aenter__()
+            self._context_entered = True
 
         async def runner():
             async with self.detector:
@@ -32,9 +49,9 @@ class EngineService:
         return False
     
     async def set_threshold(self, attack_type: str, threshold: int):
-        if self.task and not self.task.done():
-            logger.error("You must stop the engine first!")
+        if not self.task or self.task.done():
             return False
+        
         return await self.detector.set_threshold(attack_type, threshold)
 
     def status(self):
